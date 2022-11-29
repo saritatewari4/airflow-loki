@@ -1,0 +1,27 @@
+version: '3'
+services:
+  loki:
+    image: grafana/loki:2.2.0
+    command: -config.file=/etc/loki/loki-local.yaml
+    user: "0"
+    ports:
+      - "3101:3100"                                   # loki needs to be exposed so it receives logs
+    volumes:
+      - ./etc/loki-local.yaml:/etc/loki/loki-local.yaml
+      - ./data/loki-data:/tmp/loki
+
+  grafana:
+    image: grafana/grafana:9.1.6
+    volumes:
+      - ./data/grafana-data/datasources:/etc/grafana/provisioning/datasources
+      - ./data/grafana-data/dashboards-provisioning:/etc/grafana/provisioning/dashboards
+      - ./data/grafana-data/dashboards:/var/lib/grafana/dashboards
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_DISABLE_LOGIN_FORM=true
+    ports:
+      - "3000:3000"
+    depends_on:
+      - loki
+
